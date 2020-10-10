@@ -48,10 +48,11 @@
 #ifndef __cplusplus
 #  error utility.hpp header must be compiled as C++
 #endif
-
+/*
 #if defined(check)
 #  warning Detected Apple 'check' macro definition, it can cause build conflicts. Please, include this header before any Apple headers.
 #endif
+*/
 
 #include "opencv2/core.hpp"
 
@@ -848,7 +849,7 @@ public:
     Returns true if error occured while accessing the parameters (bad conversion, missing arguments,
     etc.). Call @ref printErrors to print error messages list.
      */
-    bool check() const;
+    //bool check() const;
 
     /** @brief Set the about message
 
