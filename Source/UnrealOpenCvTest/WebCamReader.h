@@ -11,6 +11,8 @@
 #include "Runtime/Engine/Classes/Engine/Texture2D.h"
 #include "WebCamReader.generated.h"
 
+DECLARE_DELEGATE_OneParam(FOnOpenCVWebcamFrameReady, cv::Mat*);
+
 UCLASS()
 class AWebCamReader : public AActor
 {
@@ -72,6 +74,7 @@ public:
     UPROPERTY(BlueprintReadOnly, Category = Webcam)
     TArray<FColor> Data;
 
+    FOnOpenCVWebcamFrameReady OnWebcamMatReady;
 protected:
 
     // Use this function to update the texture rects you want to change:

@@ -83,6 +83,7 @@ void AWebCamReader::Tick(float DeltaTime)
     {
         RefreshTimer -= 1.0f / RefreshRate;
         UpdateFrame();
+        OnWebcamMatReady.Execute(&frame);
         DoProcessing();
         UpdateTexture();
     }
@@ -105,6 +106,7 @@ void AWebCamReader::UpdateFrame()
 
 void AWebCamReader::DoProcessing()
 {
+
     // TODO: Do any processing here!
 }
 
