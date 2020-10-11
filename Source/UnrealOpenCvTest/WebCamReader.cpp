@@ -8,7 +8,7 @@ AWebCamReader::AWebCamReader()
 {
     // Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
     PrimaryActorTick.bCanEverTick = true;
-
+    
     // Initialize OpenCV and webcam properties
     CameraID = 0;
     RefreshRate = 15;
@@ -19,6 +19,29 @@ AWebCamReader::AWebCamReader()
     RefreshTimer = 0.0f;
     stream = cv::VideoCapture();
     frame = cv::Mat();
+
+    USceneComponent* WebCamRootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("WebCameraCaptureRootSceneComponent"));
+    RootComponent = WebCamRootComponent;
+    //adds the static mesh component 
+    UStaticMeshComponent* StaticMeshPlaneComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TextureDisplayMesh"));
+
+    auto MeshAsset = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Engine/BasicShapes/Plane.Plane'"));
+    if (MeshAsset.Object != nullptr)
+    {
+        StaticMeshPlaneComponent->SetStaticMesh(MeshAsset.Object);
+    }
+
+    StaticMeshPlaneComponent->SetWorldScale3D(FVector(ResizeDeminsions.X / ResizeDeminsions.Y, 1, 1));
+    StaticMeshPlaneComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+    
+    StaticMeshPlaneComponent->SetRelativeRotation(FRotator(0, -90, 90));
+   
+    auto MaterialAsset = ConstructorHelpers::FObjectFinder<UMaterial>(TEXT("Material'/Game/Materials/M_WebCam.M_WebCam'"));
+    if (MaterialAsset.Object != nullptr)
+    {
+        RenderTextureDynamicInstanceMaterial = UMaterialInstanceDynamic::Create(MaterialAsset.Object, this, TEXT("WebCamRendererMaterialInstance"));
+        StaticMeshPlaneComponent->SetMaterial(0, RenderTextureDynamicInstanceMaterial);
+    }
 }
 
 // Called when the game starts or when spawned
@@ -45,7 +68,7 @@ void AWebCamReader::BeginPlay()
         // Do first frame
         DoProcessing();
         UpdateTexture();
-        OnNextVideoFrame();
+        RenderTextureDynamicInstanceMaterial->SetTextureParameterValue(TEXT("Texture"), VideoTexture);
     }
 
 }
@@ -62,7 +85,6 @@ void AWebCamReader::Tick(float DeltaTime)
         UpdateFrame();
         DoProcessing();
         UpdateTexture();
-        OnNextVideoFrame();
     }
 }
 

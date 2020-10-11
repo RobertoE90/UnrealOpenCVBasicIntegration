@@ -28,28 +28,24 @@ public:
 
     // The device ID opened by the Video Stream
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Webcam)
-        int32 CameraID;
+    int32 CameraID;
 
     // If the webcam images should be resized every frame
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Webcam)
-        bool ShouldResize;
+    bool ShouldResize;
 
     // The targeted resize width and height (width, height)
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Webcam)
-        FVector2D ResizeDeminsions;
+    FVector2D ResizeDeminsions;
 
     // The rate at which the color data array and video texture is updated (in frames per second)
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Webcam)
-        float RefreshRate;
+    float RefreshRate;
 
     // The refresh timer
     UPROPERTY(BlueprintReadWrite, Category = Webcam)
-        float RefreshTimer;
-
-    // Blueprint Event called every time the video frame is updated
-    UFUNCTION(BlueprintImplementableEvent, Category = Webcam)
-        void OnNextVideoFrame();
-
+    float RefreshTimer;
+    
     // OpenCV fields
     cv::Mat frame;
     cv::VideoCapture stream;
@@ -62,19 +58,19 @@ public:
 
     // If the stream has succesfully opened yet
     UPROPERTY(BlueprintReadOnly, Category = Webcam)
-        bool isStreamOpen;
+    bool isStreamOpen;
 
     // The videos width and height (width, height)
     UPROPERTY(BlueprintReadWrite, Category = Webcam)
-        FVector2D VideoSize;
+    FVector2D VideoSize;
 
     // The current video frame's corresponding texture
     UPROPERTY(BlueprintReadOnly, Category = Webcam)
-        UTexture2D* VideoTexture;
+    UTexture2D* VideoTexture;
 
     // The current data array
     UPROPERTY(BlueprintReadOnly, Category = Webcam)
-        TArray<FColor> Data;
+    TArray<FColor> Data;
 
 protected:
 
@@ -86,4 +82,8 @@ protected:
 
     // Pointer to update texture region 2D struct
     FUpdateTextureRegion2D* VideoUpdateTextureRegion;
+
+private:
+    UPROPERTY()
+    UMaterialInstanceDynamic* RenderTextureDynamicInstanceMaterial;
 };
