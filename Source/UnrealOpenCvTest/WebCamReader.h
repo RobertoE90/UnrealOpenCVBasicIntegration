@@ -4,14 +4,15 @@
 #pragma once
 
 #include "opencv2/core.hpp"
-#include "opencv2/highgui.hpp"    
+//#include "opencv2/highgui.hpp"    
 #include "opencv2/imgproc.hpp"
 #include "opencv2/videoio.hpp"
 #include "GameFramework/Actor.h"
 #include "Runtime/Engine/Classes/Engine/Texture2D.h"
 #include "WebCamReader.generated.h"
 
-DECLARE_DELEGATE_OneParam(FOnOpenCVWebcamFrameReady, cv::Mat*);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnOpenCVWebcamFrameReady, cv::Mat*);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnTextureInitialized, FVector2D, UTexture2D*);//Broadcast the textureSize and a pointer to the texture
 
 UCLASS()
 class AWebCamReader : public AActor
@@ -21,10 +22,7 @@ class AWebCamReader : public AActor
 public:
     // Sets default values for this actor's properties
     AWebCamReader();
-
-    // Called when the game starts or when spawned
-    virtual void BeginPlay() override;
-
+   
     // Called every frame
     virtual void Tick(float DeltaSeconds) override;
 
@@ -55,7 +53,6 @@ public:
 
     // OpenCV prototypes
     void UpdateFrame();
-    void DoProcessing();
     void UpdateTexture();
 
     // If the stream has succesfully opened yet
@@ -74,7 +71,11 @@ public:
     UPROPERTY(BlueprintReadOnly, Category = Webcam)
     TArray<FColor> Data;
 
+    UFUNCTION(BlueprintCallable)
+    void BeginCameraReading();
+
     FOnOpenCVWebcamFrameReady OnWebcamMatReady;
+    FOnTextureInitialized OnTextureInitialized;
 protected:
 
     // Use this function to update the texture rects you want to change:
@@ -85,8 +86,4 @@ protected:
 
     // Pointer to update texture region 2D struct
     FUpdateTextureRegion2D* VideoUpdateTextureRegion;
-
-private:
-    UPROPERTY()
-    UMaterialInstanceDynamic* RenderTextureDynamicInstanceMaterial;
 };

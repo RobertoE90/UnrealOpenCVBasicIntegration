@@ -19,58 +19,6 @@ AWebCamReader::AWebCamReader()
     RefreshTimer = 0.0f;
     stream = cv::VideoCapture();
     frame = cv::Mat();
-
-    USceneComponent* WebCamRootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("WebCameraCaptureRootSceneComponent"));
-    RootComponent = WebCamRootComponent;
-    //adds the static mesh component 
-    UStaticMeshComponent* StaticMeshPlaneComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TextureDisplayMesh"));
-
-    auto MeshAsset = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Engine/BasicShapes/Plane.Plane'"));
-    if (MeshAsset.Object != nullptr)
-    {
-        StaticMeshPlaneComponent->SetStaticMesh(MeshAsset.Object);
-    }
-
-    StaticMeshPlaneComponent->SetWorldScale3D(FVector(ResizeDeminsions.X / ResizeDeminsions.Y, 1, 1));
-    StaticMeshPlaneComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-    
-    StaticMeshPlaneComponent->SetRelativeRotation(FRotator(0, -90, 90));
-   
-    auto MaterialAsset = ConstructorHelpers::FObjectFinder<UMaterial>(TEXT("Material'/Game/Materials/M_WebCam.M_WebCam'"));
-    if (MaterialAsset.Object != nullptr)
-    {
-        RenderTextureDynamicInstanceMaterial = UMaterialInstanceDynamic::Create(MaterialAsset.Object, this, TEXT("WebCamRendererMaterialInstance"));
-        StaticMeshPlaneComponent->SetMaterial(0, RenderTextureDynamicInstanceMaterial);
-    }
-}
-
-// Called when the game starts or when spawned
-void AWebCamReader::BeginPlay()
-{
-    Super::BeginPlay();
-
-    // Open the stream
-    stream.open(CameraID);
-    if (stream.isOpened())
-    {
-        // Initialize stream
-        isStreamOpen = true;
-        UpdateFrame();
-        VideoSize = FVector2D(frame.cols, frame.rows);
-        size = cv::Size(ResizeDeminsions.X, ResizeDeminsions.Y);
-        VideoTexture = UTexture2D::CreateTransient(VideoSize.X, VideoSize.Y);
-        VideoTexture->UpdateResource();
-        VideoUpdateTextureRegion = new FUpdateTextureRegion2D(0, 0, 0, 0, VideoSize.X, VideoSize.Y);
-
-        // Initialize data array
-        Data.Init(FColor(0, 0, 0, 255), VideoSize.X * VideoSize.Y);
-
-        // Do first frame
-        DoProcessing();
-        UpdateTexture();
-        RenderTextureDynamicInstanceMaterial->SetTextureParameterValue(TEXT("Texture"), VideoTexture);
-    }
-
 }
 
 // Called every frame
@@ -83,8 +31,7 @@ void AWebCamReader::Tick(float DeltaTime)
     {
         RefreshTimer -= 1.0f / RefreshRate;
         UpdateFrame();
-        OnWebcamMatReady.Execute(&frame);
-        DoProcessing();
+        OnWebcamMatReady.Broadcast(&frame);
         UpdateTexture();
     }
 }
@@ -104,11 +51,30 @@ void AWebCamReader::UpdateFrame()
     }
 }
 
-void AWebCamReader::DoProcessing()
-{
 
-    // TODO: Do any processing here!
+void AWebCamReader::BeginCameraReading()
+{
+    // Open the stream
+    stream.open(CameraID);
+    if (stream.isOpened())
+    {
+        // Initialize stream
+        isStreamOpen = true;
+        UpdateFrame();
+        VideoSize = FVector2D(frame.cols, frame.rows);
+        size = cv::Size(ResizeDeminsions.X, ResizeDeminsions.Y);
+        VideoTexture = UTexture2D::CreateTransient(VideoSize.X, VideoSize.Y);
+        VideoTexture->UpdateResource();
+        VideoUpdateTextureRegion = new FUpdateTextureRegion2D(0, 0, 0, 0, VideoSize.X, VideoSize.Y);
+
+        // Initialize data array
+        Data.Init(FColor(0, 0, 0, 255), VideoSize.X * VideoSize.Y);
+
+        UpdateTexture();
+        OnTextureInitialized.Broadcast(ResizeDeminsions, VideoTexture);
+    }
 }
+
 
 void AWebCamReader::UpdateTexture()
 {
