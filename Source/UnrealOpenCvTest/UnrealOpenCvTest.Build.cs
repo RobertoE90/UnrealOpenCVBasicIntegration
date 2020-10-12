@@ -57,11 +57,18 @@ public class UnrealOpenCvTest : ModuleRules
             PublicLibraryPaths.Add(LibPath);
 
             //Add Static Libraries
-            PublicAdditionalLibraries.Add("opencv_world320.lib");
+            PublicAdditionalLibraries.Add("opencv_core340.lib");
+            PublicAdditionalLibraries.Add("opencv_objdetect340.lib");
+            PublicAdditionalLibraries.Add("opencv_videoio340.lib");
+            PublicAdditionalLibraries.Add("opencv_imgproc340.lib");
 
             //Add Dynamic Libraries
-            PublicDelayLoadDLLs.Add("opencv_world320.dll");
-            PublicDelayLoadDLLs.Add("opencv_ffmpeg320_64.dll");
+            PublicDelayLoadDLLs.Add("opencv_core340.dll");
+            PublicDelayLoadDLLs.Add("opencv_objdetect340.dll");
+            PublicDelayLoadDLLs.Add("opencv_videoio340.dll");
+            PublicDelayLoadDLLs.Add("opencv_imgproc340.dll");
+            PublicDelayLoadDLLs.Add("opencv_ffmpeg340_64.dll");
+            //PublicDelayLoadDLLs.Add("opencv_videoio_ffmpeg440_64.dll");
         }
 
         Definitions.Add(string.Format("WITH_OPENCV_BINDING={0}", isLibrarySupported ? 1 : 0));
